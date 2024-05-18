@@ -1,4 +1,4 @@
-# k8s-webhook
+# k8s-webhook-python
 
 Exploring and messing around with multiple kubernetes webhooks via python.
 
