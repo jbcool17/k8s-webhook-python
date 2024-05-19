@@ -27,7 +27,7 @@ webhooks:
       admissionReviewVersions:
           - v1
       sideEffects: None
-      failurePolicy: Ignore
+      # failurePolicy: Ignore
     - name: serviceaccounts.k8s-webhook.svc
       namespaceSelector:
           matchLabels:
@@ -47,7 +47,7 @@ webhooks:
       admissionReviewVersions:
           - v1
       sideEffects: None
-      failurePolicy: Ignore
+      # failurePolicy: Ignore
     - name: replcas.k8s-webhook.svc
       namespaceSelector:
           matchLabels:

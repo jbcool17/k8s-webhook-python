@@ -212,7 +212,7 @@ def check_container_resource_ratio(request_info, response) -> dict:
 if __name__ == "__main__":
     # try:
     config.load_incluster_config()
-    print("In Cluster Config Loaded.")
+    logging.info("In Cluster Config Loaded.")
     app.run(debug=True, host="0.0.0.0", port=8443, ssl_context=("/etc/certs/tls.crt", "/etc/certs/tls.key"))
     # except Exception as e:
     #     logging.info(e)
