@@ -23,7 +23,7 @@ test-deployment:
 
 # TEST
 # Build and restart
-test: docker-build-push restart-webhook restart-test-deploy
+test: docker-build-push restart-webhook restart-test-deploy test-service-accounts
 
 restart-webhook:
 	sleep 2 && kubectl rollout restart -n k8s-webhook deployment k8s-webhook
@@ -32,6 +32,9 @@ restart-test-deploy:
 	sleep 10 \
 		&& kubectl rollout restart -n test deployment test-000 \
 		&& kubectl rollout restart -n test deployment test-001
+
+test-service-accounts:
+	kubectl get sa testsa-00 -n test && kubectl delete sa testsa-00 -n test && kubectl create sa testsa-00 -n test
 
 # BUILD
 docker-build-push:

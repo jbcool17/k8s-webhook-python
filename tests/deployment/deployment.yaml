@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: k8s-webhook
+    namespace: k8s-webhook
+spec:
+    selector:
+        matchLabels:
+            app: k8s-webhook
+    template:
+        metadata:
+            labels:
+                app: k8s-webhook
+        spec:
+            containers:
+                - image: jbcool17/k8s-webhook:v0.1.0
+                  imagePullPolicy: Always
+                  name: k8s-webhook
+                  volumeMounts:
+                      - name: tls
+                        mountPath: /etc/certs
+                  resources:
+                      requests: {}
+                      limits: {}
+                  ports:
+                      - containerPort: 8443
+            serviceAccountName: k8s-webhook
+            volumes:
+                - name: tls
+                  secret:
+                      secretName: k8s-webhook-admission

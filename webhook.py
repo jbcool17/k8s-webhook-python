@@ -18,9 +18,9 @@ class WebhookHandler:
 
     def __init__(self, request_info: dict):
         self.request_info = request_info
-        self.admission_review = f"Kind: {request_info['kind']}, apiVersion: {request_info['apiVersion']}"
+        self.admission_review = f"{request_info['kind']} - {request_info['apiVersion']}"
         logging.info(
-            "%s - %s - %s - %s - %s",
+            "%s | kind: %s - operation: %s - namespace: %s - name: %s",
             self.admission_review,
             self.request_info["request"]["object"]["kind"],
             self.request_info["request"]["operation"],
@@ -66,7 +66,7 @@ class WebhookHandler:
 
         return self.response
 
-    def validate_workload_identity(self) -> dict:
+    def validate_service_accounts(self) -> dict:
         self.default_response = WebhookHandler.build_default_response(
             request_info=self.request_info, check_name="validate-service-accounts"
         )
@@ -106,14 +106,14 @@ def validate_replicas() -> jsonify:
     return jsonify(response)
 
 
-@app.route("/validate-workload-identity", methods=["POST"])
+@app.route("/validate-service-accounts", methods=["POST"])
 def validate_workload_identity() -> jsonify:
     """
-    Validate service account annotations for workload identity
+    Validate service account annotations
     """
     whh = WebhookHandler(request_info=request.get_json())
 
-    response = whh.validate_workload_identity()
+    response = whh.validate_service_accounts()
 
     return jsonify(response)
 
@@ -145,11 +145,12 @@ def bytesto(bytes, to, bsize=1024):
 
 
 # ------------------------------------------------------------------------------
-# CHECKS
+# VALIDATIONS
 # ------------------------------------------------------------------------------
 def check_replicas(request_info, response) -> dict:
     """
     Validate replicas
+    - replicas less then or greater then 2
     """
 
     if request_info["request"]["object"]["spec"]["replicas"] > 2:
@@ -165,6 +166,7 @@ def check_replicas(request_info, response) -> dict:
 def check_service_account(request_info, response) -> dict:
     """
     Validate service accounts
+    - check for annotations
     """
     if "annotations" in request_info["request"]["object"]["metadata"].keys():
         annotations = request_info["request"]["object"]["metadata"]["annotations"]
@@ -177,34 +179,6 @@ def check_service_account(request_info, response) -> dict:
 
     return response
 
-
-def check_container_resources(request_info, response) -> dict:
-    """
-    Review container resource requests
-    """
-    try:
-        # Example validation: Ensure CPU limits are set
-        containers = request_info["request"]["object"]["spec"]["containers"]
-        for container in containers:
-            if (
-                "resources" not in container
-                or "limits" not in container["resources"]
-                or "cpu" not in container["resources"]["limits"]
-            ):
-                response["response"]["allowed"] = False
-                response["response"]["status"]["message"] = "Missing CPU resource limits"
-
-                return jsonify(response)
-        response["response"]["allowed"] = True
-
-        return response
-    except KeyError as e:
-        response["response"]["allowed"] = False
-        response["response"]["status"]["message"] = f"Error processing request: {e}"
-
-        return response
-
-
 def check_container_resource_ratio(request_info, response) -> dict:
     """
     Review container resource requests and total them per pod
@@ -214,7 +188,7 @@ def check_container_resource_ratio(request_info, response) -> dict:
 
     containers = request_info["request"]["object"]["spec"]["containers"]
     for container in containers:
-        # GET CPU TO MEMORY RATIOS
+        # Get requests and total cpu / memory per pod
         if "resources" in container and "requests" in container["resources"]:
             if "cpu" in container["resources"]["requests"]:
                 total_request_cpu += utils.parse_quantity(container["resources"]["requests"]["cpu"])
@@ -226,7 +200,7 @@ def check_container_resource_ratio(request_info, response) -> dict:
             ] = f"TOTAL CPU: {total_request_cpu} | TOTAL MEM:  {total_request_mem} B, {convert_size(total_request_mem)['STRING']}"
         else:
             response["response"]["allowed"] = True
-            response["response"]["status"]["message"] = "Resources not found"
+            response["response"]["status"]["message"] = "Resource Requests not found"
 
     return response
 
@@ -240,4 +214,4 @@ if __name__ == "__main__":
     #     logging.info(e)
     #     config.load_kube_config()
     #     app.run(debug=True, host="0.0.0.0")
-        # print("Local Config Loaded.")
+    # print("Local Config Loaded.")
