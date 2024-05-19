@@ -152,11 +152,14 @@ def check_replicas(request_info, response) -> dict:
     Validate replicas
     - replicas less then or greater then 2
     """
+    replicas = request_info["request"]["object"]["spec"]["replicas"]
 
-    if request_info["request"]["object"]["spec"]["replicas"] > 2:
-        response["response"]["status"]["message"] = f"{request_info['request']['name']} - Greater then 2"
+    if replicas > 2:
+        response["response"]["status"]["message"] = f"{request_info['request']['name']} : {replicas} - Greater then 2"
     else:
-        response["response"]["status"]["message"] = f"{request_info['request']['name']} - Less then or equal to 2"
+        response["response"]["status"][
+            "message"
+        ] = f"{request_info['request']['name']} : {replicas} - Less then or equal to 2"
 
     response["response"]["allowed"] = True
 
@@ -178,6 +181,7 @@ def check_service_account(request_info, response) -> dict:
     response["response"]["allowed"] = True
 
     return response
+
 
 def check_container_resource_ratio(request_info, response) -> dict:
     """

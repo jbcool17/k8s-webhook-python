@@ -7,6 +7,6 @@ COPY requirements.txt .
 RUN pip install --upgrade pip wheel setuptools && \
     pip install --no-cache-dir -r requirements.txt
 
-COPY . /app/
+COPY webhook.py /app/
 
 ENTRYPOINT [ "python", "/app/webhook.py" ]
