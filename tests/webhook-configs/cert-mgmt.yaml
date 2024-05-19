@@ -1,0 +1,52 @@
+---
+# Generate a CA Certificate used to sign certificates for the webhook
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+    name: k8s-webhook-root-cert
+    namespace: k8s-webhook
+spec:
+    secretName: k8s-webhook-root-cert
+    # 5y
+    duration: 43800h
+    issuerRef:
+        name: k8s-webhook-self-signed-issuer
+    commonName: ca.webhook.k8s-webhook
+    isCA: true
+---
+# Finally, generate a serving certificate for the webhook to use
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+    name: k8s-webhook-webhook-cert
+    namespace: k8s-webhook
+spec:
+    secretName: k8s-webhook-admission
+    # 1y
+    duration: 8760h
+    issuerRef:
+        name: k8s-webhook-root-issuer
+    dnsNames:
+        - k8s-webhook
+        - k8s-webhook.k8s-webhook
+        - k8s-webhook.k8s-webhook.svc
+---
+# Create a selfsigned Issuer, in order to create a root CA certificate for
+# signing webhook serving certificates
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+    name: k8s-webhook-self-signed-issuer
+    namespace: k8s-webhook
+spec:
+    selfSigned: {}
+---
+# Create an Issuer that uses the above generated CA certificate to issue certs
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+    name: k8s-webhook-root-issuer
+    namespace: k8s-webhook
+spec:
+    ca:
+        secretName: k8s-webhook-root-cert

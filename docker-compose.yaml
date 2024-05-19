@@ -1,0 +1,10 @@
+---
+version: '3'
+
+services:
+    k8s-webhook:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: jbcool17/k8s-webhook:v0.1.0
+        
