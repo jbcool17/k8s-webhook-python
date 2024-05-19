@@ -5,7 +5,6 @@ metadata:
     name: k8s-webhook
     namespace: k8s-webhook
 spec:
-    # type: ExternalName
     externalName: k8s-webhook.k8s-webhook.svc
     ports:
         - port: 443
