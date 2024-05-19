@@ -1,5 +1,4 @@
 ---
-# Source: nri-metadata-injection/templates/cert-manager.yaml
 # Generate a CA Certificate used to sign certificates for the webhook
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -15,7 +14,6 @@ spec:
     commonName: ca.webhook.k8s-webhook
     isCA: true
 ---
-# Source: nri-metadata-injection/templates/cert-manager.yaml
 # Finally, generate a serving certificate for the webhook to use
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -33,7 +31,6 @@ spec:
         - k8s-webhook.k8s-webhook
         - k8s-webhook.k8s-webhook.svc
 ---
-# Source: nri-metadata-injection/templates/cert-manager.yaml
 # Create a selfsigned Issuer, in order to create a root CA certificate for
 # signing webhook serving certificates
 apiVersion: cert-manager.io/v1
@@ -44,7 +41,6 @@ metadata:
 spec:
     selfSigned: {}
 ---
-# Source: nri-metadata-injection/templates/cert-manager.yaml
 # Create an Issuer that uses the above generated CA certificate to issue certs
 apiVersion: cert-manager.io/v1
 kind: Issuer
